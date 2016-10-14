@@ -1,0 +1,96 @@
+CC65C Parser BNF
+================
+
+[ ] command ::= <command_absolute> | <command_absolute_index_indirect> | <command_absolute_index_x> | <command_absolute_index_y>
+	| <command_absolute_indirect> | <command_accumulator> | <command_immediate> | <command_implied> | <command_relative>
+	| <command_stack> | <command_zero_page> | <command_zero_page_index_indirect> | <command_zero_page_index_x>
+	| <command_zero_page_index_y> | <command_zero_page_indirect> | <command_zero_page_indirect_index>
+
+[ ] command_absolute ::= ["adc" | "and" | "asl" | "bit" | "brk" | "cmp" | "cpx" | "cpy" | "dec" | "eor" | "inc" | "jmp" | "jsr" 
+	| "lda" | "lsr" | "ldx" | "ldy" | "ora" | "rol" | "ror" | "sbc" | "sta" | "sty" | "stx" | "stz" | "trb" | "tsb"] <expression>
+
+[ ] command_absolute_index_indirect ::= ["jmp"] "(" <expression> "," "x" ")"
+
+[ ] command_absolute_index_x ::= ["adc" | "and" | "asl" | "bit" | "cmp" | "dec" | "eor" | "inc" | "lda" | "ldx" | "ldy" | "lsr" 
+	| "ora" | "rol" | "ror" | "sbc" | "sta" | "stz"] <expression> , "x"
+
+[ ] command_absolute_index_y ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] <expression> , "y"
+
+[ ] command_absolute_indirect ::= ["jmp"] "(" <expression> ")"
+
+[ ] command_accumulator ::= ["asl" | "dec" | "inc" | "lsr" | "rol" | "ror"] "a"
+
+[ ] command_immediate ::= ["adc" | "and" | "bit" | "cmp" | "cpx" | "cpy" | "eor" | "lda" | "ldx" | "ldy" | "ora" | "sbc"] "#" <expression>
+
+[ ] command_implied ::= ["clc" | "cld" | "cli" | "clv" | "dex" | "dey" | "inx" | "iny" | "nop" | "sec" | "sed" | "sei" | "stp" 
+	| "tax" | "tay" | "tsx" | "txa" | "txs" | "tya" | "wai"]
+
+[ ] command_relative ::= ["bbr0" | "bbr1" | "bbr2" | "bbr3" | "bbr4" | "bbr5" | "bbr6" | "bbr7" | "bbs0" | "bbs1" | "bbs2" 
+	| "bbs3" | "bbs4" | "bbs5" | "bbs6" | "bbs7" | "bcc" | "bcs" | "beq" | "bmi" | "bne" | "bpl" | "bra" | "bvc" | "bvs"] <expression>
+
+[ ] command_stack ::= ["pha" | "php" | "phx" | "phy" | "pla" | "plp" | "plx" | "ply" | "rti" | "rts"]
+
+[ ] command_zero_page ::= ["adc" | "and" | "asl" | "bit" | "cmp" | "cpx" | "cpy" | "dec" | "eor" | "inc" | "lda" | "ldx" | "ldy" 
+	| "lsr" | "ora" | "rmb0" | "rmb1" | "rmb2" | "rmb3" | "rmb4" | "rmb5" | "rmb6" | "rmb7" | "rol" | "ror" | "sbc" 
+	| "smb0" | "smb1" | "smb2" | "smb3" | "smb4" | "smb5" | "smb6" | "smb7" | "sta" | "stx" | "sty" | "stz" | "trb" | "tsb"] <expression>
+
+[ ] command_zero_page_index_indirect ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] "(" <expression> "," "x" ")"
+
+[ ] command_zero_page_index_x ::= ["adc" | "and" | "asl" | "bit" | "cmp" | "dec" | "eor" | "inc" | "lda" | "ldy" | "lsr" | "ora" | "rol" | "ror" 
+	| "sbc" | "sta" | "sty" | "stz"] <expression> "," "x"
+
+[ ] command_zero_page_index_y ::= ["ldx" | "stx"] <expression> "," "y"
+
+[ ] command_zero_page_indirect ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] "(" <expression> ")"
+
+[ ] command_zero_page_indirect_index ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] "(" <expression> ")" "," "y"
+
+[O] condition ::= <expression> <operator> <condition> | <expression>
+
+[X] directive ::= <directive_condition> | <directive_define> | <directive_include>
+
+[X] directive_condition ::= <directive_condition_if> | <directive_condition_ifdef>
+
+[X] directive_condition_if ::= "if" <condition> <statement_list> ["elif" <condition> <statement_list>]* 
+	["else" <statement_list>]? "endif"
+
+[X] directive_condition_ifdef ::= "ifdef" <identifier> <statement_list> ["elifdef" <identifier> <statement_list>]* 
+	["else" <statement_list>]? "endif"
+
+[X] directive_define ::= <directive_define_data> | <directive_define_define> | <directive_define_orgin>
+	| <directive_define_reservation>
+
+[X] directive_define_data ::= ["db" | "dw"] <expression_list>
+
+[X] directive_define_define ::= "def" <identifier> <expression> | ["segment" | "undef"] <identifier>
+
+[X] directive_define_orgin ::= "org" <expression>
+
+[X] directive_define_reservation ::= "res" <expression> "," <expression>
+
+[X] directive_include ::= <include> <literal_string>
+
+[O] expression ::= <expression_term_0> [["&" | "|" | "^"] <expression_term_0>]*
+
+[X] expression_factor ::= "(" <expression> ")" | [<identifier> | <literal>] "[" <expression> "]"? | <macro> 
+	| <position> | <scalar>
+
+[X] expression_list ::= <expression> "," <expression_list> | <expression>
+
+[O] expression_term_0 ::= <expression_term_1> [["+" | "-"] <expression_term_1>]*
+
+[O] expression_term_1 ::= <expression_term_2> [["/" | "%"] <expression_term_2>]*
+
+[O] expression_term_2 ::= <expression_term_3> ["*" <expression_term_3>]*
+
+[X] expression_term_3 ::= ["~" | "!"]? <expression_factor>
+
+[X] macro ::= <macro_double> | <macro_single> | <macro_word>
+
+[X] macro_double ::= "word" "(" <expression> "," <expression> ")"
+
+[X] macro_single ::= ["byte" | "high" | "low"] "(" <expression> ")"
+
+[X] statement ::= <command> | <directive> | <label>
+
+[X] statement_list ::= <statement>*
