@@ -14,6 +14,10 @@ Changelog
 =========
 
 ###Version 0.1.1642
+*Updated: 10/15/2016*
+
+* Stubbed out expression enumeration routines
+
 *Updated: 10/13/2016*
 
 * Transitioned project from [ccmos](https://github.com/majestic53/ccmos) to cc65c

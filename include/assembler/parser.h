@@ -171,6 +171,10 @@ namespace cc65c {
 					__inout cc65c::assembler::tree &tree
 					);
 
+				void enumerate_tree_expression_term_4(
+					__inout cc65c::assembler::tree &tree
+					);
+
 				void enumerate_tree_include(
 					__inout cc65c::assembler::tree &tree
 					);

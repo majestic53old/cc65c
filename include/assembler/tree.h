@@ -39,7 +39,7 @@ namespace cc65c {
 			public:
 
 				tree(
-					__in cc65c::assembler::tree_t type
+					__in_opt cc65c::assembler::tree_t type = TREE_STATEMENT
 					);
 
 				tree(
@@ -124,7 +124,7 @@ namespace cc65c {
 
 				cc65c::core::uuid_t m_node_root;
 
-				std::mutex m_tree_mutex;
+				std::recursive_mutex m_tree_mutex;
 		};
 	};
 }

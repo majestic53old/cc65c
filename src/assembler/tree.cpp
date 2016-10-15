@@ -32,7 +32,7 @@ namespace cc65c {
 			((_TYPE_) > TREE_MAX ? STRING_UNKNOWN : STRING_CHECK(TREE_STR[_TYPE_]))
 
 		tree::tree(
-			__in cc65c::assembler::tree_t type
+			__in_opt cc65c::assembler::tree_t type
 			) :
 				cc65c::core::object(cc65c::core::OBJECT_TREE, type),
 				m_node_current(NODE_UNDEFINED),
@@ -194,7 +194,7 @@ namespace cc65c {
 
 			TRACE_ENTRY();
 
-			std::lock_guard<std::mutex> lock(m_tree_mutex);
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
 
 			if(!m_node.empty()) {
 				m_node.insert(std::make_pair(child.id(), child));
@@ -294,7 +294,7 @@ namespace cc65c {
 		{
 			TRACE_ENTRY();
 
-			std::lock_guard<std::mutex> lock(m_tree_mutex);
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
 
 			m_node.clear();
 			m_node_current = NODE_UNDEFINED;
@@ -329,7 +329,7 @@ namespace cc65c {
 		{
 			TRACE_ENTRY();
 
-			std::lock_guard<std::mutex> lock(m_tree_mutex);
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
 
 			cc65c::assembler::node &result = find(id)->second;
 			m_node_current = id;
@@ -345,7 +345,7 @@ namespace cc65c {
 		{
 			TRACE_ENTRY();
 
-			std::lock_guard<std::mutex> lock(m_tree_mutex);
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
 
 			m_node_current = find(m_node_current)->second.at(index);
 			cc65c::assembler::node &result = find(m_node_current)->second;
@@ -359,7 +359,7 @@ namespace cc65c {
 		{
 			TRACE_ENTRY();
 
-			std::lock_guard<std::mutex> lock(m_tree_mutex);
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
 
 			m_node_current = find(m_node_current)->second.parent();
 			cc65c::assembler::node &result = find(m_node_current)->second;
@@ -373,7 +373,7 @@ namespace cc65c {
 		{
 			TRACE_ENTRY();
 
-			std::lock_guard<std::mutex> lock(m_tree_mutex);
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
 
 			m_node_current = m_node_root;
 			cc65c::assembler::node &result = find(m_node_current)->second;
@@ -387,7 +387,7 @@ namespace cc65c {
 		{
 			TRACE_ENTRY();
 
-			std::lock_guard<std::mutex> lock(m_tree_mutex);
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
 
 			cc65c::assembler::node &result = find(m_node_current)->second;
 
@@ -402,7 +402,7 @@ namespace cc65c {
 
 			TRACE_ENTRY();
 
-			std::lock_guard<std::mutex> lock(m_tree_mutex);
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
 
 			result = m_node.size();
 
@@ -419,7 +419,7 @@ namespace cc65c {
 
 			TRACE_ENTRY();
 
-			std::lock_guard<std::mutex> lock(m_tree_mutex);
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
 
 			result = cc65c::assembler::tree::as_string(*this, verbose);
 
@@ -432,7 +432,7 @@ namespace cc65c {
 		{
 			TRACE_ENTRY();
 
-			std::lock_guard<std::mutex> lock(m_tree_mutex);
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
 
 			TRACE_EXIT();
 			return find(m_node_current)->second.token();
@@ -445,7 +445,7 @@ namespace cc65c {
 
 			TRACE_ENTRY();
 
-			std::lock_guard<std::mutex> lock(m_tree_mutex);
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
 
 			result = (cc65c::assembler::tree_t) m_subtype;
 
