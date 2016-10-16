@@ -223,6 +223,7 @@ namespace cc65c {
 			bool move;
 			size_t index;
 			uint32_t subtype;
+			cc65c::core::stream_t column, row;
 
 			TRACE_ENTRY();
 
@@ -232,7 +233,8 @@ namespace cc65c {
 
 			move = (tree.size() > 0);
 			index = tree.add(cc65c::assembler::lexer::token());
-			subtype = cc65c::assembler::lexer::token().type();
+			subtype = cc65c::assembler::lexer::token().subtype();
+			cc65c::assembler::stream::metadata(row, column);
 
 			if(move) {
 				tree.move_child_index(index);
@@ -243,20 +245,20 @@ namespace cc65c {
 			}
 
 			if(cc65c::assembler::lexer::match(TOKEN_SYMBOL_BRACE, SYMBOL_BRACE_OPEN)) {
-				enumerate_tree_command_indirect(tree, subtype);
+				enumerate_tree_command_indirect(tree, subtype, row, column);
 			} else if(cc65c::assembler::lexer::match(TOKEN_SYMBOL_IMMEDIATE)) {
-				enumerate_tree_command_immediate(tree, subtype);
+				enumerate_tree_command_immediate(tree, subtype, row, column);
 			} else if(cc65c::assembler::lexer::match(TOKEN_KEYWORD_REGISTER, KEYWORD_REGISTER_A)) {
-				enumerate_tree_command_accumulator(tree, subtype);
+				enumerate_tree_command_accumulator(tree, subtype, row, column);
 			} else if(!cc65c::assembler::lexer::match(TOKEN_KEYWORD_COMMAND)
 					&& !cc65c::assembler::lexer::match(TOKEN_KEYWORD_CONDITION)
 					&& !cc65c::assembler::lexer::match(TOKEN_KEYWORD_DEFINE)
 					&& !cc65c::assembler::lexer::match(TOKEN_END)
 					&& !cc65c::assembler::lexer::match(TOKEN_KEYWORD_INCLUDE)
 					&& !cc65c::assembler::lexer::match(TOKEN_LABEL)) {
-				enumerate_tree_command_index(tree, subtype);
+				enumerate_tree_command_index(tree, subtype, row, column);
 			} else {
-				enumerate_tree_command_implied(tree, subtype);
+				enumerate_tree_command_implied(tree, subtype, row, column);
 			}
 
 			if(move) {
@@ -269,7 +271,9 @@ namespace cc65c {
 		void 
 		parser::enumerate_tree_command_accumulator(
 			__inout cc65c::assembler::tree &tree,
-			__in uint32_t command
+			__in uint32_t type,
+			__in cc65c::core::stream_t row,
+			__in cc65c::core::stream_t column
 			)
 		{
 			TRACE_ENTRY();
@@ -280,7 +284,10 @@ namespace cc65c {
 
 			tree.add(cc65c::assembler::lexer::token());
 
-			// TODO: test against known accumulator commands
+			if(!ADDRESS_MODE_ACCUMULATOR_CONTAINS(type)) {
+				THROW_LEXER_EXCEPTION_FORMAT(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_MODE, 
+					row, column, true);
+			}
 
 			if(cc65c::assembler::lexer::has_next()) {
 				cc65c::assembler::lexer::move_next();
@@ -292,7 +299,9 @@ namespace cc65c {
 		void 
 		parser::enumerate_tree_command_immediate(
 			__inout cc65c::assembler::tree &tree,
-			__in uint32_t command
+			__in uint32_t type,
+			__in cc65c::core::stream_t row,
+			__in cc65c::core::stream_t column
 			)
 		{
 			size_t index;
@@ -301,6 +310,11 @@ namespace cc65c {
 
 			if(!cc65c::assembler::lexer::match(TOKEN_SYMBOL_IMMEDIATE)) {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_IMMEDIATE, true);
+			}
+
+			if(!ADDRESS_MODE_IMMEDIATE_CONTAINS(type)) {
+				THROW_LEXER_EXCEPTION_FORMAT(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_MODE, 
+					row, column, true);
 			}
 
 			index = tree.add(cc65c::assembler::lexer::token());
@@ -312,9 +326,6 @@ namespace cc65c {
 
 			cc65c::assembler::lexer::move_next();
 			enumerate_tree_expression(tree);
-
-			// TODO: test against known immediate commands
-
 			tree.move_parent();
 
 			TRACE_EXIT();
@@ -323,12 +334,18 @@ namespace cc65c {
 		void 
 		parser::enumerate_tree_command_implied(
 			__inout cc65c::assembler::tree &tree,
-			__in uint32_t command
+			__in uint32_t type,
+			__in cc65c::core::stream_t row,
+			__in cc65c::core::stream_t column
 			)
 		{
 			TRACE_ENTRY();
 
-			// TODO: test against known implied commands
+			if(!ADDRESS_MODE_IMPLIED_CONTAINS(type)
+					&& !ADDRESS_MODE_STACK_CONTAINS(type)) {
+				THROW_LEXER_EXCEPTION_FORMAT(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_MODE, 
+					row, column, true);
+			}
 
 			TRACE_EXIT();
 		}
@@ -336,7 +353,9 @@ namespace cc65c {
 		void 
 		parser::enumerate_tree_command_index(
 			__inout cc65c::assembler::tree &tree,
-			__in uint32_t command
+			__in uint32_t type,
+			__in cc65c::core::stream_t row,
+			__in cc65c::core::stream_t column
 			)
 		{
 			TRACE_ENTRY();
@@ -352,15 +371,23 @@ namespace cc65c {
 				cc65c::assembler::lexer::move_next();
 
 				if(cc65c::assembler::lexer::match(TOKEN_KEYWORD_REGISTER, KEYWORD_REGISTER_X)) {
+
+					if(!ADDRESS_MODE_ABSOLUTE_INDEX_X_CONTAINS(type)
+							&& !ADDRESS_MODE_ZERO_PAGE_INDEX_X_CONTAINS(type)) {
+						THROW_LEXER_EXCEPTION_FORMAT(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_MODE, 
+							row, column, true);
+					}
+
 					tree.add(cc65c::assembler::lexer::token());
-
-					// TODO: test against known index x commands
-
 				} else if(cc65c::assembler::lexer::match(TOKEN_KEYWORD_REGISTER, KEYWORD_REGISTER_Y)) {
+
+					if(!ADDRESS_MODE_ABSOLUTE_INDEX_Y_CONTAINS(type)
+							&& !ADDRESS_MODE_ZERO_PAGE_INDEX_Y_CONTAINS(type)) {
+						THROW_LEXER_EXCEPTION_FORMAT(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_MODE, 
+							row, column, true);
+					}
+
 					tree.add(cc65c::assembler::lexer::token());
-
-					// TODO: test against known index y commands
-
 				} else {
 					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_REGISTER, true);
 				}
@@ -368,10 +395,11 @@ namespace cc65c {
 				if(cc65c::assembler::lexer::has_next()) {
 					cc65c::assembler::lexer::move_next();
 				}
-			} else {
-
-				// TODO: test against known absolute commands
-
+			} else if(!ADDRESS_MODE_ABSOLUTE_CONTAINS(type)
+					&& !ADDRESS_MODE_RELATIVE_CONTAINS(type)
+					&& !ADDRESS_MODE_ZERO_PAGE_CONTAINS(type)) {
+				THROW_LEXER_EXCEPTION_FORMAT(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_MODE, 
+					row, column, true);
 			}
 
 			TRACE_EXIT();
@@ -380,7 +408,9 @@ namespace cc65c {
 		void 
 		parser::enumerate_tree_command_indirect(
 			__inout cc65c::assembler::tree &tree,
-			__in uint32_t command
+			__in uint32_t type,
+			__in cc65c::core::stream_t row,
+			__in cc65c::core::stream_t column
 			)
 		{
 			size_t index;
@@ -413,6 +443,11 @@ namespace cc65c {
 					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_REGISTER_X, true);
 				}
 
+				if(!ADDRESS_MODE_ABSOLUTE_INDEX_INDIRECT_CONTAINS(type)
+						&& !ADDRESS_MODE_ZERO_PAGE_INDEX_INDIRECT_CONTAINS(type)) {
+					THROW_LEXER_EXCEPTION_FORMAT(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_MODE, row, column, true);
+				}
+
 				tree.add(cc65c::assembler::lexer::token());
 
 				if(!cc65c::assembler::lexer::has_next()) {
@@ -427,8 +462,6 @@ namespace cc65c {
 
 				tree.move_parent();
 				tree.add(cc65c::assembler::lexer::token());
-
-				// TODO: test against known index indirect commands
 
 				if(cc65c::assembler::lexer::has_next()) {
 					cc65c::assembler::lexer::move_next();
@@ -453,17 +486,20 @@ namespace cc65c {
 						THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_REGISTER_Y, true);
 					}
 
-					tree.add(cc65c::assembler::lexer::token());
+					if(!ADDRESS_MODE_ZERO_PAGE_INDIRECT_INDEX_CONTAINS(type)) {
+						THROW_LEXER_EXCEPTION_FORMAT(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_MODE, 
+							row, column, true);
+					}
 
-					// TODO: test against known indirect index commands
+					tree.add(cc65c::assembler::lexer::token());
 
 					if(cc65c::assembler::lexer::has_next()) {
 						cc65c::assembler::lexer::move_next();
 					}
-				} else {
-
-					// TODO: test against known indirect commands
-
+				} else if(!ADDRESS_MODE_ABSOLUTE_INDIRECT_CONTAINS(type)
+						&& !ADDRESS_MODE_ZERO_PAGE_INDIRECT_CONTAINS(type)) {
+					THROW_LEXER_EXCEPTION_FORMAT(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_MODE, 
+						row, column, true);
 				}
 			} else {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_BRACE, true);
