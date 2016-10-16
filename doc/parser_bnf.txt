@@ -45,52 +45,54 @@ CC65C Parser BNF
 
 [ ] command_zero_page_indirect_index ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] "(" <expression> ")" "," "y"
 
-[O] condition ::= <expression> <operator> <condition> | <expression>
+[ ] condition ::= <expression> <operator> <condition> | <expression>
 
-[X] directive ::= <directive_condition> | <directive_define> | <directive_include>
+[ ] directive ::= <directive_condition> | <directive_define> | <directive_include>
 
-[X] directive_condition ::= <directive_condition_if> | <directive_condition_ifdef>
+[ ] directive_condition ::= <directive_condition_if> | <directive_condition_ifdef>
 
-[X] directive_condition_if ::= "if" <condition> <statement_list> ["elif" <condition> <statement_list>]* 
+[ ] directive_condition_if ::= "if" <condition> <statement_list> ["elif" <condition> <statement_list>]* 
 	["else" <statement_list>]? "endif"
 
-[X] directive_condition_ifdef ::= "ifdef" <identifier> <statement_list> ["elifdef" <identifier> <statement_list>]* 
+[ ] directive_condition_ifdef ::= "ifdef" <identifier> <statement_list> ["elifdef" <identifier> <statement_list>]* 
 	["else" <statement_list>]? "endif"
 
-[X] directive_define ::= <directive_define_data> | <directive_define_define> | <directive_define_orgin>
+[ ] directive_define ::= <directive_define_data> | <directive_define_define> | <directive_define_orgin>
 	| <directive_define_reservation>
 
-[X] directive_define_data ::= ["db" | "dw"] <expression_list>
+[ ] directive_define_data ::= ["db" | "dw"] <expression_list>
 
-[X] directive_define_define ::= "def" <identifier> <expression> | ["segment" | "undef"] <identifier>
+[ ] directive_define_define ::= "def" <identifier> <expression> | ["segment" | "undef"] <identifier>
 
-[X] directive_define_orgin ::= "org" <expression>
+[ ] directive_define_orgin ::= "org" <expression>
 
-[X] directive_define_reservation ::= "res" <expression> "," <expression>
+[ ] directive_define_reservation ::= "res" <expression> "," <expression>
 
-[X] directive_include ::= <include> <literal_string>
+[ ] directive_include ::= <include> <literal_string>
 
-[O] expression ::= <expression_term_0> [["&" | "|" | "^"] <expression_term_0>]*
+[ ] expression ::= <expression_term_0>
 
-[X] expression_factor ::= "(" <expression> ")" | [<identifier> | <literal>] "[" <expression> "]"? | <macro> 
+[ ] expression_factor ::= "(" <expression> ")" | [<identifier> | <literal>] "[" <expression> "]"? | <macro> 
 	| <position> | <scalar>
 
-[X] expression_list ::= <expression> "," <expression_list> | <expression>
+[ ] expression_list ::= <expression> "," <expression_list> | <expression>
 
-[O] expression_term_0 ::= <expression_term_1> [["+" | "-"] <expression_term_1>]*
+[ ] expression_term_0 ;:= <expression_term_1> [["&" | "|" | "^" | "&&" | "||"] <expression_term_0>]*
 
-[O] expression_term_1 ::= <expression_term_2> [["/" | "%"] <expression_term_2>]*
+[ ] expression_term_1 ::= <expression_term_2> [["+" | "-"] <expression_term_1>]*
 
-[O] expression_term_2 ::= <expression_term_3> ["*" <expression_term_3>]*
+[ ] expression_term_2 ::= <expression_term_3> [["/" | "%"] <expression_term_2>]*
 
-[X] expression_term_3 ::= ["~" | "!"]? <expression_factor>
+[ ] expression_term_3 ::= <expression_term_4> ["*" <expression_term_3>]*
 
-[X] macro ::= <macro_double> | <macro_single> | <macro_word>
+[ ] expression_term_4 ::= ["~" | "!"]? <expression_factor>
 
-[X] macro_double ::= "word" "(" <expression> "," <expression> ")"
+[ ] macro ::= <macro_double> | <macro_single> | <macro_word>
 
-[X] macro_single ::= ["byte" | "high" | "low"] "(" <expression> ")"
+[ ] macro_double ::= "word" "(" <expression> "," <expression> ")"
 
-[X] statement ::= <command> | <directive> | <label>
+[ ] macro_single ::= ["byte" | "high" | "low"] "(" <expression> ")"
 
-[X] statement_list ::= <statement>*
+[ ] statement ::= <command> | <directive> | <label>
+
+[ ] statement_list ::= <statement>*

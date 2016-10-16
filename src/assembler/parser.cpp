@@ -220,17 +220,254 @@ namespace cc65c {
 			__inout cc65c::assembler::tree &tree
 			)
 		{
+			bool move;
+			size_t index;
+			uint32_t subtype;
+
 			TRACE_ENTRY();
 
 			if(!cc65c::assembler::lexer::match(TOKEN_KEYWORD_COMMAND)) {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_COMMAND, true);
 			}
 
-			// TODO
-			if(cc65c::assembler::lexer::match(TOKEN_KEYWORD_COMMAND)) {
-				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_COMMAND, true);
+			move = (tree.size() > 0);
+			index = tree.add(cc65c::assembler::lexer::token());
+			subtype = cc65c::assembler::lexer::token().type();
+
+			if(move) {
+				tree.move_child_index(index);
 			}
-			// ---
+
+			if(cc65c::assembler::lexer::has_next()) {
+				cc65c::assembler::lexer::move_next();
+			}
+
+			if(cc65c::assembler::lexer::match(TOKEN_SYMBOL_BRACE, SYMBOL_BRACE_OPEN)) {
+				enumerate_tree_command_indirect(tree, subtype);
+			} else if(cc65c::assembler::lexer::match(TOKEN_SYMBOL_IMMEDIATE)) {
+				enumerate_tree_command_immediate(tree, subtype);
+			} else if(cc65c::assembler::lexer::match(TOKEN_KEYWORD_REGISTER, KEYWORD_REGISTER_A)) {
+				enumerate_tree_command_accumulator(tree, subtype);
+			} else if(!cc65c::assembler::lexer::match(TOKEN_KEYWORD_COMMAND)
+					&& !cc65c::assembler::lexer::match(TOKEN_KEYWORD_CONDITION)
+					&& !cc65c::assembler::lexer::match(TOKEN_KEYWORD_DEFINE)
+					&& !cc65c::assembler::lexer::match(TOKEN_END)
+					&& !cc65c::assembler::lexer::match(TOKEN_KEYWORD_INCLUDE)
+					&& !cc65c::assembler::lexer::match(TOKEN_LABEL)) {
+				enumerate_tree_command_index(tree, subtype);
+			} else {
+				enumerate_tree_command_implied(tree, subtype);
+			}
+
+			if(move) {
+				tree.move_parent();
+			}
+
+			TRACE_EXIT();
+		}
+
+		void 
+		parser::enumerate_tree_command_accumulator(
+			__inout cc65c::assembler::tree &tree,
+			__in uint32_t command
+			)
+		{
+			TRACE_ENTRY();
+
+			if(!cc65c::assembler::lexer::match(TOKEN_KEYWORD_REGISTER, KEYWORD_REGISTER_A)) {
+				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_ACCUMULATOR, true);
+			}
+
+			tree.add(cc65c::assembler::lexer::token());
+
+			// TODO: test against known accumulator commands
+
+			if(cc65c::assembler::lexer::has_next()) {
+				cc65c::assembler::lexer::move_next();
+			}
+
+			TRACE_EXIT();
+		}
+
+		void 
+		parser::enumerate_tree_command_immediate(
+			__inout cc65c::assembler::tree &tree,
+			__in uint32_t command
+			)
+		{
+			size_t index;
+
+			TRACE_ENTRY();
+
+			if(!cc65c::assembler::lexer::match(TOKEN_SYMBOL_IMMEDIATE)) {
+				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_IMMEDIATE, true);
+			}
+
+			index = tree.add(cc65c::assembler::lexer::token());
+			tree.move_child_index(index);
+
+			if(!cc65c::assembler::lexer::has_next()) {
+				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_EXPRESSION, true);
+			}
+
+			cc65c::assembler::lexer::move_next();
+			enumerate_tree_expression(tree);
+
+			// TODO: test against known immediate commands
+
+			tree.move_parent();
+
+			TRACE_EXIT();
+		}
+
+		void 
+		parser::enumerate_tree_command_implied(
+			__inout cc65c::assembler::tree &tree,
+			__in uint32_t command
+			)
+		{
+			TRACE_ENTRY();
+
+			// TODO: test against known implied commands
+
+			TRACE_EXIT();
+		}
+
+		void 
+		parser::enumerate_tree_command_index(
+			__inout cc65c::assembler::tree &tree,
+			__in uint32_t command
+			)
+		{
+			TRACE_ENTRY();
+
+			enumerate_tree_expression(tree);
+
+			if(cc65c::assembler::lexer::match(TOKEN_SYMBOL_SEPERATOR)) {
+
+				if(!cc65c::assembler::lexer::has_next()) {
+					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_REGISTER, true);
+				}
+
+				cc65c::assembler::lexer::move_next();
+
+				if(cc65c::assembler::lexer::match(TOKEN_KEYWORD_REGISTER, KEYWORD_REGISTER_X)) {
+					tree.add(cc65c::assembler::lexer::token());
+
+					// TODO: test against known index x commands
+
+				} else if(cc65c::assembler::lexer::match(TOKEN_KEYWORD_REGISTER, KEYWORD_REGISTER_Y)) {
+					tree.add(cc65c::assembler::lexer::token());
+
+					// TODO: test against known index y commands
+
+				} else {
+					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_REGISTER, true);
+				}
+
+				if(cc65c::assembler::lexer::has_next()) {
+					cc65c::assembler::lexer::move_next();
+				}
+			} else {
+
+				// TODO: test against known absolute commands
+
+			}
+
+			TRACE_EXIT();
+		}
+
+		void 
+		parser::enumerate_tree_command_indirect(
+			__inout cc65c::assembler::tree &tree,
+			__in uint32_t command
+			)
+		{
+			size_t index;
+
+			TRACE_ENTRY();
+
+			if(!cc65c::assembler::lexer::match(TOKEN_SYMBOL_BRACE, SYMBOL_BRACE_OPEN)) {
+				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_BRACE, true);
+			}
+
+			index = tree.add(cc65c::assembler::lexer::token());
+			tree.move_child_index(index);
+
+			if(!cc65c::assembler::lexer::has_next()) {
+				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_EXPRESSION, true);
+			}
+
+			cc65c::assembler::lexer::move_next();
+			enumerate_tree_expression(tree);
+
+			if(cc65c::assembler::lexer::match(TOKEN_SYMBOL_SEPERATOR)) {
+
+				if(!cc65c::assembler::lexer::has_next()) {
+					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_REGISTER, true);
+				}
+
+				cc65c::assembler::lexer::move_next();
+
+				if(!cc65c::assembler::lexer::match(TOKEN_KEYWORD_REGISTER, KEYWORD_REGISTER_X)) {
+					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_REGISTER_X, true);
+				}
+
+				tree.add(cc65c::assembler::lexer::token());
+
+				if(!cc65c::assembler::lexer::has_next()) {
+					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_BRACE, true);
+				}
+
+				cc65c::assembler::lexer::move_next();
+
+				if(!cc65c::assembler::lexer::match(TOKEN_SYMBOL_BRACE, SYMBOL_BRACE_CLOSE)) {
+					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_BRACE, true);
+				}
+
+				tree.move_parent();
+				tree.add(cc65c::assembler::lexer::token());
+
+				// TODO: test against known index indirect commands
+
+				if(cc65c::assembler::lexer::has_next()) {
+					cc65c::assembler::lexer::move_next();
+				}
+			} else if(cc65c::assembler::lexer::match(TOKEN_SYMBOL_BRACE, SYMBOL_BRACE_CLOSE)) {
+				tree.move_parent();
+				tree.add(cc65c::assembler::lexer::token());
+
+				if(cc65c::assembler::lexer::has_next()) {
+					cc65c::assembler::lexer::move_next();
+				}
+
+				if(cc65c::assembler::lexer::match(TOKEN_SYMBOL_SEPERATOR)) {
+
+					if(!cc65c::assembler::lexer::has_next()) {
+						THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_REGISTER, true);
+					}
+
+					cc65c::assembler::lexer::move_next();
+
+					if(!cc65c::assembler::lexer::match(TOKEN_KEYWORD_REGISTER, KEYWORD_REGISTER_Y)) {
+						THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_REGISTER_Y, true);
+					}
+
+					tree.add(cc65c::assembler::lexer::token());
+
+					// TODO: test against known indirect index commands
+
+					if(cc65c::assembler::lexer::has_next()) {
+						cc65c::assembler::lexer::move_next();
+					}
+				} else {
+
+					// TODO: test against known indirect commands
+
+				}
+			} else {
+				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_BRACE, true);
+			}
 
 			TRACE_EXIT();
 		}
@@ -294,6 +531,7 @@ namespace cc65c {
 			__inout cc65c::assembler::tree &tree
 			)
 		{
+			bool move;
 			size_t index;
 
 			TRACE_ENTRY();
@@ -302,13 +540,19 @@ namespace cc65c {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_CONDITION_IF, true);
 			}
 
-			tree.add(cc65c::assembler::lexer::token());
+			move = (tree.size() > 0);
+			index = tree.add(cc65c::assembler::lexer::token());
 
 			if(!cc65c::assembler::lexer::has_next()) {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_IF, true);
 			}
 
 			cc65c::assembler::lexer::move_next();
+
+			if(move) {
+				tree.move_child_index(index);
+			}
+
 			enumerate_tree_condition_expression(tree);
 			enumerate_tree_statement_list(tree);
 
@@ -343,6 +587,10 @@ namespace cc65c {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_IF, true);
 			}
 
+			if(move) {
+				tree.move_parent();
+			}
+
 			if(cc65c::assembler::lexer::has_next()) {
 				cc65c::assembler::lexer::move_next();
 			}
@@ -355,6 +603,7 @@ namespace cc65c {
 			__inout cc65c::assembler::tree &tree
 			)
 		{
+			bool move;
 			size_t index;
 
 			TRACE_ENTRY();
@@ -363,13 +612,18 @@ namespace cc65c {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_CONDITION_IF_DEFINE, true);
 			}
 
-			tree.add(cc65c::assembler::lexer::token());
+			move = (tree.size() > 0);
+			index = tree.add(cc65c::assembler::lexer::token());
 
 			if(!cc65c::assembler::lexer::has_next()) {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_IF_DEFINE, true);
 			}
 
 			cc65c::assembler::lexer::move_next();
+
+			if(move) {
+				tree.move_child_index(index);
+			}
 
 			if(!cc65c::assembler::lexer::match(TOKEN_IDENTIFIER)) {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_IDENTIFIER, true);
@@ -426,6 +680,10 @@ namespace cc65c {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_IF_DEFINE, true);
 			}
 
+			if(move) {
+				tree.move_parent();
+			}
+
 			if(cc65c::assembler::lexer::has_next()) {
 				cc65c::assembler::lexer::move_next();
 			}
@@ -440,6 +698,7 @@ namespace cc65c {
 		{
 			size_t index = 0;
 			uint32_t subtype;
+			bool move = false;
 
 			TRACE_ENTRY();
 
@@ -456,6 +715,7 @@ namespace cc65c {
 				case KEYWORD_DEFINE_RESERVE:
 				case KEYWORD_DEFINE_SEGMENT:
 				case KEYWORD_DEFINE_UNDEFINE:
+					move = (tree.size() > 0);
 					index = tree.add(cc65c::assembler::lexer::token());
 					break;
 				default:
@@ -467,6 +727,10 @@ namespace cc65c {
 			}
 
 			cc65c::assembler::lexer::move_next();
+
+			if(move) {
+				tree.move_child_index(index);
+			}
 
 			switch(subtype) {
 				case KEYWORD_DEFINE_DATA_BYTE:
@@ -520,6 +784,10 @@ namespace cc65c {
 					break;
 				default:
 					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_DEFINE, true);
+			}
+
+			if(move) {
+				tree.move_parent();
 			}
 
 			TRACE_EXIT();
@@ -760,19 +1028,27 @@ namespace cc65c {
 			__inout cc65c::assembler::tree &tree
 			)
 		{
+			bool move;
+			size_t index;
+
 			TRACE_ENTRY();
 
 			if(!cc65c::assembler::lexer::match(TOKEN_KEYWORD_INCLUDE)) {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_INCLUDE, true);
 			}
 
-			tree.add(cc65c::assembler::lexer::token());
+			move = (tree.size() > 0);
+			index = tree.add(cc65c::assembler::lexer::token());
 
 			if(!cc65c::assembler::lexer::has_next()) {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_LITERAL, true);
 			}
 
 			cc65c::assembler::lexer::move_next();
+
+			if(move) {
+				tree.move_child_index(index);
+			}
 
 			if(!cc65c::assembler::lexer::match(TOKEN_LITERAL)) {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_LITERAL, true);
@@ -782,6 +1058,10 @@ namespace cc65c {
 
 			if(cc65c::assembler::lexer::has_next()) {
 				cc65c::assembler::lexer::move_next();
+			}
+
+			if(move) {
+				tree.move_parent();
 			}
 
 			TRACE_EXIT();

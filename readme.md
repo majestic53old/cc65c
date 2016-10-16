@@ -16,6 +16,7 @@ Changelog
 ###Version 0.1.1642
 *Updated: 10/15/2016*
 
+* Added command enumeration routines to parser (incomplete)
 * Stubbed out expression enumeration routines
 
 *Updated: 10/13/2016*

@@ -115,6 +115,31 @@ namespace cc65c {
 					__inout cc65c::assembler::tree &tree
 					);
 
+				void enumerate_tree_command_accumulator(
+					__inout cc65c::assembler::tree &tree,
+					__in uint32_t command
+					);
+
+				void enumerate_tree_command_immediate(
+					__inout cc65c::assembler::tree &tree,
+					__in uint32_t command
+					);
+
+				void enumerate_tree_command_implied(
+					__inout cc65c::assembler::tree &tree,
+					__in uint32_t command
+					);
+
+				void enumerate_tree_command_index(
+					__inout cc65c::assembler::tree &tree,
+					__in uint32_t command
+					);
+
+				void enumerate_tree_command_indirect(
+					__inout cc65c::assembler::tree &tree,
+					__in uint32_t command
+					);
+
 				void enumerate_tree_condition(
 					__inout cc65c::assembler::tree &tree
 					);
