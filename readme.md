@@ -17,6 +17,7 @@ Changelog
 *Updated: 10/16/2016*
 
 * Implemented command address mode validation
+* Added lexer/parser unit test cases (incomplete)
 * Moved token metadata to /include/assembler/define.h
 
 *Updated: 10/15/2016*

@@ -322,6 +322,23 @@ namespace cc65c {
 			return result;
 		}
 
+		bool 
+		tree::match(
+			__in cc65c::assembler::tree_t type
+			)
+		{
+			bool result;
+
+			TRACE_ENTRY();
+
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
+
+			result = (((cc65c::assembler::tree_t) m_subtype) == type);
+
+			TRACE_EXIT_FORMAT("Result=%x", result);
+			return result;
+		}
+
 		cc65c::assembler::node &
 		tree::move_child(
 			__in cc65c::core::uuid_t id

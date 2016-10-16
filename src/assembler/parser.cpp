@@ -554,7 +554,7 @@ namespace cc65c {
 
 				cc65c::assembler::lexer::move_next();
 				tree.move_child_index(index);
-				enumerate_tree_condition_expression(tree);
+				enumerate_tree_expression(tree);
 				tree.move_parent();
 			}
 			// ---
@@ -1278,6 +1278,23 @@ namespace cc65c {
 			std::lock_guard<std::recursive_mutex> lock(m_parser_mutex);
 
 			result = (m_tree_position > 0);
+
+			TRACE_EXIT_FORMAT("Result=%x", result);
+			return result;
+		}
+
+		bool 
+		parser::match(
+			__in cc65c::assembler::tree_t type
+			)
+		{
+			bool result;
+
+			TRACE_ENTRY();
+
+			std::lock_guard<std::recursive_mutex> lock(m_parser_mutex);
+
+			result = m_tree.at(m_tree_position).match(type);
 
 			TRACE_EXIT_FORMAT("Result=%x", result);
 			return result;

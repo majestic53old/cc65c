@@ -88,6 +88,10 @@ namespace cc65c {
 
 				void clear(void);
 
+				bool match(
+					__in cc65c::assembler::tree_t type
+					);
+
 				cc65c::assembler::node &move_child(
 					__in cc65c::core::uuid_t id
 					);

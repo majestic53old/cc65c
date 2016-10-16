@@ -9,14 +9,14 @@ CC65C Parser BNF
 [X] command_absolute ::= ["adc" | "and" | "asl" | "bit" | "brk" | "cmp" | "cpx" | "cpy" | "dec" | "eor" | "inc" | "jmp" | "jsr" 
 	| "lda" | "ldx" | "ldy" | "lsr" | "ora" | "rol" | "ror" | "sbc" | "sta" | "stx" | "sty" | "stz" | "trb" | "tsb"] <expression>
 
-[X] command_absolute_index_indirect ::= ["jmp"] "(" <expression> "," "x" ")"
+[X] command_absolute_index_indirect ::= ["jmp"] "[" <expression> "," "x" "]"
 
 [X] command_absolute_index_x ::= ["adc" | "and" | "asl" | "bit" | "cmp" | "dec" | "eor" | "inc" | "lda" | "ldx" | "ldy" | "lsr" 
 	| "ora" | "rol" | "ror" | "sbc" | "sta" | "stz"] <expression> , "x"
 
 [X] command_absolute_index_y ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] <expression> , "y"
 
-[X] command_absolute_indirect ::= ["jmp"] "(" <expression> ")"
+[X] command_absolute_indirect ::= ["jmp"] "[" <expression> "]"
 
 [X] command_accumulator ::= ["asl" | "dec" | "inc" | "lsr" | "rol" | "ror"] "a"
 
@@ -34,18 +34,18 @@ CC65C Parser BNF
 	| "lsr" | "ora" | "rmb0" | "rmb1" | "rmb2" | "rmb3" | "rmb4" | "rmb5" | "rmb6" | "rmb7" | "rol" | "ror" | "sbc" 
 	| "smb0" | "smb1" | "smb2" | "smb3" | "smb4" | "smb5" | "smb6" | "smb7" | "sta" | "stx" | "sty" | "stz" | "trb" | "tsb"] <expression>
 
-[X] command_zero_page_index_indirect ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] "(" <expression> "," "x" ")"
+[X] command_zero_page_index_indirect ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] "[" <expression> "," "x" "]"
 
 [X] command_zero_page_index_x ::= ["adc" | "and" | "asl" | "bit" | "cmp" | "dec" | "eor" | "inc" | "lda" | "ldy" | "lsr" | "ora" | "rol" | "ror" 
 	| "sbc" | "sta" | "sty" | "stz"] <expression> "," "x"
 
 [X] command_zero_page_index_y ::= ["ldx" | "stx"] <expression> "," "y"
 
-[X] command_zero_page_indirect ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] "(" <expression> ")"
+[X] command_zero_page_indirect ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] "[" <expression> "]"
 
-[X] command_zero_page_indirect_index ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] "(" <expression> ")" "," "y"
+[X] command_zero_page_indirect_index ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] "[" <expression> "]" "," "y"
 
-[ ] condition ::= <expression> <operator> <condition> | <expression>
+[ ] condition ::= <expression> <operator> <expression> | <expression>
 
 [X] directive ::= <directive_condition> | <directive_define> | <directive_include>
 

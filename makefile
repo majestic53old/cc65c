@@ -23,6 +23,9 @@ DIR_INC=./include/
 DIR_LOG=./log/
 DIR_ROOT=./
 DIR_SRC=./src/
+DIR_TEST=./test/
+DIR_TEST_LEXER=./lexer/
+DIR_TEST_PARSER=./parser/
 EXE=cc65c
 JOB_SLOTS=4
 LOG_MEM=val_err.log
@@ -34,9 +37,9 @@ TRACE_FLAGS_REL=CC_TRACE_FLAGS=-DTRACE_COLOR\ -DTRACE=0
 
 all: debug
 
-debug: clean init lib_debug exe_debug
+debug: clean init lib_debug exe_debug unit_test_debug
 
-release: clean init lib_release exe_release
+release: clean init lib_release exe_release unit_test_release
 
 testing: debug test
 
@@ -82,9 +85,25 @@ lib_release:
 	cd $(DIR_SRC) && make $(BUILD_FLAGS_REL) $(TRACE_FLAGS_REL) build -j $(JOB_SLOTS)
 	cd $(DIR_SRC) && make archive
 
+unit_test_debug:
+	@echo ''
+	@echo '============================================'
+	@echo 'BUILDING UNIT TEST EXECUTABLES (DEBUG)'
+	@echo '============================================'
+	cd $(DIR_TEST)$(DIR_TEST_LEXER) && make $(BUILD_FLAGS_DBG) $(TRACE_FLAGS_DBG)$(TRACE)
+	cd $(DIR_TEST)$(DIR_TEST_PARSER) && make $(BUILD_FLAGS_DBG) $(TRACE_FLAGS_DBG)$(TRACE)
+
+unit_test_release:
+	@echo ''
+	@echo '============================================'
+	@echo 'BUILDING UNIT TEST EXECUTABLES (RELEASE)'
+	@echo '============================================'
+	cd $(DIR_TEST)$(DIR_TEST_LEXER) && make $(BUILD_FLAGS_REL) $(TRACE_FLAGS_REL)
+	cd $(DIR_TEST)$(DIR_TEST_PARSER) && make $(BUILD_FLAGS_REL) $(TRACE_FLAGS_REL)
+
 ### TESTING ###
 
-test: static mem
+test: unit_test static mem
 
 mem:
 	@echo ''

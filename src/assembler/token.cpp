@@ -328,7 +328,7 @@ namespace cc65c {
 			type = (cc65c::assembler::token_t) reference.m_subtype;
 			subtype = reference.m_token_subtype;
 			result << cc65c::core::object::as_string(reference, verbose)
-				<< ", Type=" << TOKEN_STRING(type);
+				<< ", Type=" << SCALAR_AS_HEX(cc65c::assembler::token_t, type) << "(" << TOKEN_STRING(type) << ")";
 
 			if(subtype != SUBTYPE_UNDEFINED) {
 
@@ -389,7 +389,7 @@ namespace cc65c {
 
 				if(!buffer.empty()) {
 					std::transform(buffer.begin(), buffer.end(), buffer.begin(), ::toupper);
-					result << ", " << buffer;
+					result << ", " << SCALAR_AS_HEX(uint32_t, subtype) << "(" << buffer << ")";
 				}
 			}
 

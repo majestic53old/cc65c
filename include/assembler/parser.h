@@ -66,6 +66,10 @@ namespace cc65c {
 
 				bool has_previous(void);
 
+				bool match(
+					__in cc65c::assembler::tree_t type
+					);
+
 				cc65c::assembler::tree &move_next(void);
 
 				cc65c::assembler::tree &move_next(
