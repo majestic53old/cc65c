@@ -14,6 +14,11 @@ Changelog
 =========
 
 ###Version 0.1.1642
+*Updated: 10/16/2016*
+
+* Implemented command address mode validation
+* Moved token metadata to /include/assembler/define.h
+
 *Updated: 10/15/2016*
 
 * Added command enumeration routines to parser <s>(incomplete)</s>
