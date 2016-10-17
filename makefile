@@ -103,7 +103,7 @@ unit_test_release:
 
 ### TESTING ###
 
-test: unit_test static mem
+test: static mem
 
 mem:
 	@echo ''
