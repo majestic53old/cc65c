@@ -13,6 +13,11 @@ Table of Contents
 Changelog
 =========
 
+###Version 0.1.1643
+*Updated: 10/17/2016*
+
+* Implemented parser expression enumeration routines (incomplete)
+
 ###Version 0.1.1642
 *Updated: 10/16/2016*
 

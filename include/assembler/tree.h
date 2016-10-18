@@ -73,6 +73,10 @@ namespace cc65c {
 					__in cc65c::assembler::node &child
 					);
 
+				size_t add(
+					__in cc65c::assembler::tree &tree
+					);
+
 				static std::string as_string(
 					__in const tree &reference,
 					__in_opt bool verbose = false
@@ -87,6 +91,8 @@ namespace cc65c {
 					);
 
 				void clear(void);
+
+				bool empty(void);
 
 				bool match(
 					__in cc65c::assembler::tree_t type
@@ -117,6 +123,10 @@ namespace cc65c {
 				cc65c::assembler::tree_t type(void);
 
 			protected:
+
+				void add_tree(
+					__in cc65c::assembler::tree &tree
+					);
 
 				std::map<cc65c::core::uuid_t, cc65c::assembler::node>::iterator find(
 					__in cc65c::core::uuid_t id

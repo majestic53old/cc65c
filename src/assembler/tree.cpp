@@ -214,6 +214,63 @@ namespace cc65c {
 			return result;
 		}
 
+		size_t 
+		tree::add(
+			__in cc65c::assembler::tree &tree
+			)
+		{
+			size_t result = 0;
+
+			TRACE_ENTRY();
+
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
+
+			if(!m_node.empty()) {
+				result = find(m_node_current)->second.size();
+			}
+
+			add_tree(tree);
+
+			TRACE_EXIT_FORMAT("Result=%u", result);
+			return result;
+		}
+
+		void 
+		tree::add_tree(
+			__in cc65c::assembler::tree &tree
+			)
+		{
+			bool move;
+			size_t child = 0, parent;
+
+			TRACE_ENTRY();
+
+			if(!tree.empty()) {
+				move = (size() > 0);
+				cc65c::assembler::token tok = tree.token();
+				parent = add(tok);
+
+				if(move) {
+					move_child_index(parent);
+				}
+
+				if(tree.node().size()) {
+
+					for(; child < tree.node().size(); ++child) {
+						tree.move_child_index(child);
+						add_tree(tree);
+						tree.move_parent();
+					}
+				}
+
+				if(move) {
+					move_parent();
+				}
+			}
+
+			TRACE_EXIT();
+		}
+
 		std::string 
 		tree::as_string(
 			__in const tree &reference,
@@ -301,6 +358,21 @@ namespace cc65c {
 			m_node_root = NODE_UNDEFINED;
 
 			TRACE_EXIT();
+		}
+
+		bool 
+		tree::empty(void)
+		{
+			bool result;
+
+			TRACE_ENTRY();
+
+			std::lock_guard<std::recursive_mutex> lock(m_tree_mutex);
+
+			result = m_node.empty();
+
+			TRACE_EXIT_FORMAT("Result=%x", result);
+			return result;
 		}
 
 		std::map<cc65c::core::uuid_t, cc65c::assembler::node>::iterator 

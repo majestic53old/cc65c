@@ -45,7 +45,7 @@ CC65C Parser BNF
 
 [X] command_zero_page_indirect_index ::= ["adc" | "and" | "cmp" | "eor" | "lda" | "ora" | "sbc" | "sta"] "[" <expression> "]" "," "y"
 
-[ ] condition ::= <expression> <operator> <expression> | <expression>
+[X] condition ::= <expression> <operator> <expression> | <expression>
 
 [X] directive ::= <directive_condition> | <directive_define> | <directive_include>
 
@@ -70,12 +70,12 @@ CC65C Parser BNF
 
 [X] directive_include ::= <include> <literal_string>
 
-[ ] expression ::= <expression_term_0>
+[X] expression ::= <expression_term_0>
 
-[ ] expression_factor ::= "(" <expression> ")" | [<identifier> | <literal>] "[" <expression> "]"? | <macro> 
+[X] expression_factor ::= "(" <expression> ")" | [<identifier> | <literal>] "[" <expression> "]"? | <macro> 
 	| <position> | <scalar>
 
-[ ] expression_list ::= <expression> "," <expression_list> | <expression>
+[X] expression_list ::= <expression> "," <expression_list> | <expression>
 
 [ ] expression_term_0 ;:= <expression_term_1> [["&" | "|" | "^" | "&&" | "||"] <expression_term_0>]*
 
@@ -85,7 +85,7 @@ CC65C Parser BNF
 
 [ ] expression_term_3 ::= <expression_term_4> ["*" <expression_term_3>]*
 
-[ ] expression_term_4 ::= ["~" | "!"]? <expression_factor>
+[X] expression_term_4 ::= ["~" | "!"]? <expression_factor>
 
 [X] macro ::= <macro_double> | <macro_single> | <macro_word>
 

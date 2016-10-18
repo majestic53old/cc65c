@@ -304,6 +304,7 @@ namespace cc65c {
 			__in cc65c::core::stream_t column
 			)
 		{
+			bool move;
 			size_t index;
 
 			TRACE_ENTRY();
@@ -317,8 +318,12 @@ namespace cc65c {
 					row, column, true);
 			}
 
+			move = (tree.size() > 0);
 			index = tree.add(cc65c::assembler::lexer::token());
-			tree.move_child_index(index);
+
+			if(move) {
+				tree.move_child_index(index);
+			}
 
 			if(!cc65c::assembler::lexer::has_next()) {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_EXPRESSION, true);
@@ -326,7 +331,10 @@ namespace cc65c {
 
 			cc65c::assembler::lexer::move_next();
 			enumerate_tree_expression(tree);
-			tree.move_parent();
+
+			if(move) {
+				tree.move_parent();
+			}
 
 			TRACE_EXIT();
 		}
@@ -413,6 +421,7 @@ namespace cc65c {
 			__in cc65c::core::stream_t column
 			)
 		{
+			bool move;
 			size_t index;
 
 			TRACE_ENTRY();
@@ -421,8 +430,12 @@ namespace cc65c {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_BRACE, true);
 			}
 
+			move = (tree.size() > 0);
 			index = tree.add(cc65c::assembler::lexer::token());
-			tree.move_child_index(index);
+
+			if(move) {
+				tree.move_child_index(index);
+			}
 
 			if(!cc65c::assembler::lexer::has_next()) {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_EXPRESSION, true);
@@ -460,14 +473,21 @@ namespace cc65c {
 					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_BRACE, true);
 				}
 
-				tree.move_parent();
+				if(move) {
+					tree.move_parent();
+				}
+
 				tree.add(cc65c::assembler::lexer::token());
 
 				if(cc65c::assembler::lexer::has_next()) {
 					cc65c::assembler::lexer::move_next();
 				}
 			} else if(cc65c::assembler::lexer::match(TOKEN_SYMBOL_BRACE, SYMBOL_BRACE_CLOSE)) {
-				tree.move_parent();
+
+				if(move) {
+					tree.move_parent();
+				}
+
 				tree.add(cc65c::assembler::lexer::token());
 
 				if(cc65c::assembler::lexer::has_next()) {
@@ -538,14 +558,16 @@ namespace cc65c {
 			__inout cc65c::assembler::tree &tree
 			)
 		{
+			bool move;
 			size_t index;
+			cc65c::assembler::tree subtree;
 
 			TRACE_ENTRY();
 
-			// TODO
-			enumerate_tree_expression(tree);
+			enumerate_tree_expression(subtree);
 
 			if(cc65c::assembler::lexer::match(TOKEN_OPERATOR_BINARY)) {
+				move = (tree.size() > 0);
 				index = tree.add(cc65c::assembler::lexer::token());
 
 				if(!cc65c::assembler::lexer::has_next()) {
@@ -553,11 +575,20 @@ namespace cc65c {
 				}
 
 				cc65c::assembler::lexer::move_next();
-				tree.move_child_index(index);
+
+				if(move) {
+					tree.move_child_index(index);
+				}
+
+				tree.add(subtree);
 				enumerate_tree_expression(tree);
-				tree.move_parent();
+
+				if(move) {
+					tree.move_parent();
+				}
+			} else {
+				tree.add(subtree);
 			}
-			// ---
 
 			TRACE_EXIT();
 		}
@@ -930,6 +961,7 @@ namespace cc65c {
 			__inout cc65c::assembler::tree &tree
 			)
 		{
+			bool move;
 			size_t index;
 
 			TRACE_ENTRY();
@@ -939,6 +971,7 @@ namespace cc65c {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_EXPECTING_LITERAL, true);
 			}
 
+			move = (tree.size() > 0);
 			index = tree.add(cc65c::assembler::lexer::token());
 
 			if(cc65c::assembler::lexer::has_next()) {
@@ -951,9 +984,16 @@ namespace cc65c {
 					}
 
 					cc65c::assembler::lexer::move_next();
-					tree.move_child_index(index);
+
+					if(move) {
+						tree.move_child_index(index);
+					}
+
 					enumerate_tree_expression(tree);
-					tree.move_parent();
+
+					if(move) {
+						tree.move_parent();
+					}
 
 					if(!cc65c::assembler::lexer::match(TOKEN_SYMBOL_BRACE, SYMBOL_BRACE_CLOSE)) {
 						THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_BRACE, true);
@@ -973,11 +1013,41 @@ namespace cc65c {
 			__inout cc65c::assembler::tree &tree
 			)
 		{
+			bool move;
+			size_t index;
+			cc65c::assembler::tree subtree;
+
 			TRACE_ENTRY();
 
-			enumerate_tree_expression_term_1(tree);
+			enumerate_tree_expression_term_1(subtree);
 
-			// TODO
+			if(cc65c::assembler::lexer::match(TOKEN_OPERATOR_BINARY, OPERATOR_BINARY_AND)
+					|| cc65c::assembler::lexer::match(TOKEN_OPERATOR_BINARY, OPERATOR_BINARY_OR)
+					|| cc65c::assembler::lexer::match(TOKEN_SYMBOL_ARITHMETIC, SYMBOL_ARITHMETIC_AND)
+					|| cc65c::assembler::lexer::match(TOKEN_SYMBOL_ARITHMETIC, SYMBOL_ARITHMETIC_OR)
+					|| cc65c::assembler::lexer::match(TOKEN_SYMBOL_ARITHMETIC, SYMBOL_ARITHMETIC_XOR)) {
+				move = (tree.size() > 0);
+				index = tree.add(cc65c::assembler::lexer::token());
+
+				if(!cc65c::assembler::lexer::has_next()) {
+					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_EXPRESSION, true);
+				}
+
+				cc65c::assembler::lexer::move_next();
+
+				if(move) {
+					tree.move_child_index(index);
+				}
+
+				tree.add(subtree);
+				enumerate_tree_expression_term_0(tree);
+
+				if(move) {
+					tree.move_parent();
+				}
+			} else {
+				tree.add(subtree);
+			}
 
 			TRACE_EXIT();
 		}
@@ -1130,6 +1200,7 @@ namespace cc65c {
 		{
 			size_t index = 0;
 			uint32_t subtype;
+			bool move = false;
 
 			TRACE_ENTRY();
 
@@ -1143,6 +1214,7 @@ namespace cc65c {
 				case KEYWORD_MACRO_LOW:
 				case KEYWORD_MACRO_HIGH:
 				case KEYWORD_MACRO_WORD:
+					move = (tree.size() > 0);
 					index = tree.add(cc65c::assembler::lexer::token());
 					break;
 				default:
@@ -1164,7 +1236,10 @@ namespace cc65c {
 			}
 
 			cc65c::assembler::lexer::move_next();
-			tree.move_child_index(index);
+
+			if(move) {
+				tree.move_child_index(index);
+			}
 
 			switch(subtype) {
 				case KEYWORD_MACRO_BYTE:
@@ -1190,7 +1265,9 @@ namespace cc65c {
 					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_INVALID_MACRO, true);
 			}
 
-			tree.move_parent();
+			if(move) {
+				tree.move_parent();
+			}
 
 			if(!cc65c::assembler::lexer::match(TOKEN_SYMBOL_BRACKET, SYMBOL_BRACKET_CLOSE)) {
 				THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_MACRO, true);
