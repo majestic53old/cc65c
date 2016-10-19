@@ -560,11 +560,10 @@ namespace cc65c {
 		{
 			bool move;
 			size_t index;
-			cc65c::assembler::tree subtree;
 
 			TRACE_ENTRY();
 
-			enumerate_tree_expression(subtree);
+			enumerate_tree_expression(tree);
 
 			if(cc65c::assembler::lexer::match(TOKEN_OPERATOR_BINARY)) {
 				move = (tree.size() > 0);
@@ -580,14 +579,11 @@ namespace cc65c {
 					tree.move_child_index(index);
 				}
 
-				tree.add(subtree);
 				enumerate_tree_expression(tree);
 
 				if(move) {
 					tree.move_parent();
 				}
-			} else {
-				tree.add(subtree);
 			}
 
 			TRACE_EXIT();
@@ -1015,13 +1011,12 @@ namespace cc65c {
 		{
 			bool move;
 			size_t index;
-			cc65c::assembler::tree subtree;
 
 			TRACE_ENTRY();
 
-			enumerate_tree_expression_term_1(subtree);
+			enumerate_tree_expression_term_1(tree);
 
-			if(cc65c::assembler::lexer::match(TOKEN_OPERATOR_BINARY, OPERATOR_BINARY_AND)
+			while(cc65c::assembler::lexer::match(TOKEN_OPERATOR_BINARY, OPERATOR_BINARY_AND)
 					|| cc65c::assembler::lexer::match(TOKEN_OPERATOR_BINARY, OPERATOR_BINARY_OR)
 					|| cc65c::assembler::lexer::match(TOKEN_SYMBOL_ARITHMETIC, SYMBOL_ARITHMETIC_AND)
 					|| cc65c::assembler::lexer::match(TOKEN_SYMBOL_ARITHMETIC, SYMBOL_ARITHMETIC_OR)
@@ -1039,14 +1034,11 @@ namespace cc65c {
 					tree.move_child_index(index);
 				}
 
-				tree.add(subtree);
-				enumerate_tree_expression_term_0(tree);
+				enumerate_tree_expression_term_1(tree);
 
 				if(move) {
 					tree.move_parent();
 				}
-			} else {
-				tree.add(subtree);
 			}
 
 			TRACE_EXIT();
@@ -1057,11 +1049,34 @@ namespace cc65c {
 			__inout cc65c::assembler::tree &tree
 			)
 		{
+			bool move;
+			size_t index;
+
 			TRACE_ENTRY();
 
 			enumerate_tree_expression_term_2(tree);
 
-			// TODO
+			while(cc65c::assembler::lexer::match(TOKEN_SYMBOL_ARITHMETIC, SYMBOL_ARITHMETIC_ADDITION)
+					|| cc65c::assembler::lexer::match(TOKEN_SYMBOL_ARITHMETIC, SYMBOL_ARITHMETIC_SUBTRACTION)) {
+				move = (tree.size() > 0);
+				index = tree.add(cc65c::assembler::lexer::token());
+
+				if(!cc65c::assembler::lexer::has_next()) {
+					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_EXPRESSION, true);
+				}
+
+				cc65c::assembler::lexer::move_next();
+
+				if(move) {
+					tree.move_child_index(index);
+				}
+
+				enumerate_tree_expression_term_2(tree);
+
+				if(move) {
+					tree.move_parent();
+				}
+			}
 
 			TRACE_EXIT();
 		}
@@ -1071,11 +1086,34 @@ namespace cc65c {
 			__inout cc65c::assembler::tree &tree
 			)
 		{
+			bool move;
+			size_t index;
+
 			TRACE_ENTRY();
 
 			enumerate_tree_expression_term_3(tree);
 
-			// TODO
+			while(cc65c::assembler::lexer::match(TOKEN_SYMBOL_ARITHMETIC, SYMBOL_ARITHMETIC_DIVISION)
+					|| cc65c::assembler::lexer::match(TOKEN_SYMBOL_ARITHMETIC, SYMBOL_ARITHMETIC_MODULUS)) {
+				move = (tree.size() > 0);
+				index = tree.add(cc65c::assembler::lexer::token());
+
+				if(!cc65c::assembler::lexer::has_next()) {
+					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_EXPRESSION, true);
+				}
+
+				cc65c::assembler::lexer::move_next();
+
+				if(move) {
+					tree.move_child_index(index);
+				}
+
+				enumerate_tree_expression_term_3(tree);
+
+				if(move) {
+					tree.move_parent();
+				}
+			}
 
 			TRACE_EXIT();
 		}
@@ -1085,11 +1123,33 @@ namespace cc65c {
 			__inout cc65c::assembler::tree &tree
 			)
 		{
+			bool move;
+			size_t index;
+
 			TRACE_ENTRY();
 
 			enumerate_tree_expression_term_4(tree);
 
-			// TODO
+			while(cc65c::assembler::lexer::match(TOKEN_SYMBOL_ARITHMETIC, SYMBOL_ARITHMETIC_MULTIPLICATION)) {
+				move = (tree.size() > 0);
+				index = tree.add(cc65c::assembler::lexer::token());
+
+				if(!cc65c::assembler::lexer::has_next()) {
+					THROW_LEXER_EXCEPTION(CC65C_ASSEMBLER_PARSER_EXCEPTION_UNTERMINATED_EXPRESSION, true);
+				}
+
+				cc65c::assembler::lexer::move_next();
+
+				if(move) {
+					tree.move_child_index(index);
+				}
+
+				enumerate_tree_expression_term_4(tree);
+
+				if(move) {
+					tree.move_parent();
+				}
+			}
 
 			TRACE_EXIT();
 		}

@@ -14,9 +14,9 @@ Changelog
 =========
 
 ###Version 0.1.1643
-*Updated: 10/17/2016*
+*Updated: 10/17-18/2016*
 
-* Implemented parser expression enumeration routines (incomplete)
+* Implemented parser expression enumeration routines <s>(incomplete)</s>
 
 ###Version 0.1.1642
 *Updated: 10/16/2016*
